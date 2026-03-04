@@ -1,0 +1,15 @@
+{
+    "mcpServers": {
+        "sistema-juridico": {
+            "command": "php",
+            "args": [
+                "artisan",
+                "boost:mcp"
+            ],
+            "env": {
+                "APP_ENV": "local",
+                "PHP_BINARY": "php"
+            }
+        }
+    }
+}
