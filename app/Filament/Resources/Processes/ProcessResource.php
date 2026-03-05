@@ -21,6 +21,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Infolists\Components\TextEntry\TextEntrySize;
 
 class ProcessResource extends Resource
 {
@@ -45,14 +46,19 @@ class ProcessResource extends Resource
                 // CABEÇALHO FIXO
                 Section::make('Resumo do Processo')
                     ->components([
-                        Grid::make(4)
+                        Grid::make(2)
                             ->components([
                                 TextEntry::make('number')
-                                    ->label('Número / Título')
-                                    ->weight('bold'),
+                                    ->label('Número')
+                                    ->weight('bold')
+                                    ->size('lg')
+                                    ->columnSpanFull(),
                                     
                                 TextEntry::make('client.name')
-                                    ->label('Cliente'),
+                                    ->label('Cliente')
+                                    ->size('lg')
+                                    ->color('primary') // Dá um destaque azul/primário ao nome do cliente
+                                    ->columnSpanFull(),
                                 TextEntry::make('status')
                                     ->badge()
                                     ->color(fn ($state): string => match ($state?->value ?? $state) {
@@ -65,7 +71,8 @@ class ProcessResource extends Resource
                                 TextEntry::make('risk_level')
                                     ->label('Risco'),
                             ])
-                    ]),
+                    ])
+                    ->columnSpanFull(),
 
                 // SISTEMA DE ABAS (TIMELINE E DOCUMENTOS)
                 Tabs::make('NavegacaoProcesso')

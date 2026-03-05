@@ -75,19 +75,24 @@ class Task extends Model implements HasMedia
     }
     public function assignee() { return $this->belongsTo(User::class, 'assigned_to'); }
 
+// Mantém as configurações básicas (O QUE logar)
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logAll()
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Tarefa {$eventName}")
-            ->tap(function (Activity $activity) {
-                // Injeta o ID do processo pai no JSON do log
-                // Ajuste '$this->process_id' conforme o seu relacionamento real
-                $activity->properties = $activity->properties->merge([
-                    'process_id' => $this->process_id, 
-                ]);
-            });
+            ->setDescriptionForEvent(fn(string $eventName) => "Tarefa {$eventName}");
+    }
+
+    // ADICIONE ESTE MÉTODO (COMO logar as propriedades extras)
+    // Este método é chamado automaticamente pela Trait LogsActivity antes de salvar o log
+    public function tapActivity(Activity $activity, string $eventName)
+    {
+        if ($this->process_id) {
+            $activity->properties = $activity->properties->merge([
+                'process_id' => $this->process_id,
+            ]);
+        }
     }
 }

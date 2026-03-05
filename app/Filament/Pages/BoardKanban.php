@@ -74,7 +74,13 @@ class BoardKanban extends Page implements HasSchemas, HasActions
     #[On('update-task-status')]
     public function updateTaskStatus($taskId, $newColumnId): void
     {
-        Task::where('id', $taskId)->update(['column_id' => $newColumnId]);
+        $task = Task::find($taskId);
+        
+        if ($task) {
+            $task->column_id = $newColumnId;
+            $task->save(); // O save() dispara os eventos e o Spatie Activity Log escuta
+        }
+
         $this->loadBoard($this->board->id);
         Notification::make()->title('Tarefa movida!')->success()->send();
     }
