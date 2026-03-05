@@ -12,7 +12,7 @@ use Spatie\Activitylog\Contracts\Activity;
 
 class Comment extends Model
 {
-    use HasFactory, LogsActivity; // Adicionada a trait LogsActivity
+    use HasFactory, LogsActivity; // <-- Trait adicionada aqui!
 
     protected $fillable = [
         'task_id',
@@ -20,7 +20,7 @@ class Comment extends Model
         'content',
     ];
 
-    // Configura o log para acompanhar o conteúdo do comentário
+    // 1. Configura o que será salvo no log
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -30,12 +30,15 @@ class Comment extends Model
             ->setDescriptionForEvent(fn(string $eventName) => "Comentário {$eventName}");
     }
 
-    // Navega: Comentário -> Tarefa -> Processo (para injetar o process_id)
+    // 2. Injeta o process_id no log
     public function tapActivity(Activity $activity, string $eventName)
     {
-        if ($this->task && $this->task->process_id) {
+        // Busca a tarefa para pegar o process_id
+        $task = $this->task ?? \App\Models\Task::find($this->task_id);
+        
+        if ($task && $task->process_id) {
             $activity->properties = $activity->properties->merge([
-                'process_id' => $this->task->process_id,
+                'process_id' => $task->process_id,
             ]);
         }
     }

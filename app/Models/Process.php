@@ -8,10 +8,15 @@ use App\Enums\ProcessStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+// IMPORTAÇÕES DO SPATIE MEDIA LIBRARY
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Process extends Model
+class Process extends Model implements HasMedia
 {
-    use HasFactory;
+    // Adicionada a trait InteractsWithMedia
+    use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'number',
@@ -44,8 +49,16 @@ class Process extends Model
         return $this->belongsTo(Unit::class);
     }
 
-    public function checklists(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    public function checklists(): MorphMany
     {
         return $this->morphMany(Checklist::class, 'checklistable');
+    }
+
+    /**
+     * Relacionamento com as Tasks para a Timeline
+     */
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
     }
 }

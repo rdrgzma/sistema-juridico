@@ -28,6 +28,7 @@ use Livewire\Attributes\On;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class BoardKanban extends Page implements HasSchemas, HasActions
 {
@@ -198,12 +199,20 @@ class BoardKanban extends Page implements HasSchemas, HasActions
                                     ])
                             ]),
                         
-                        Tab::make('Mídia e Comentários')
+                        Tab::make('Documentos e Comentários')
                             ->schema([
                                 SpatieMediaLibraryFileUpload::make('attachments')
                                     ->collection('tasks')
-                                    ->multiple(),
-                                
+                                    ->multiple()
+                                    // Define um nome amigável para o arquivo antes de salvar
+                                    ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $record): string {
+                                        // Pega o nome original e limpa (remove acentos e espaços)
+                                        $name = str(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))->slug();
+                                        $extension = $file->getClientOriginalExtension();
+                                        
+                                        // Exemplo: nome-do-arquivo.pdf
+                                        return "{$name}.{$extension}";
+                                    }),                              
                                 Repeater::make('comments')
                                     ->relationship()
                                     ->schema([

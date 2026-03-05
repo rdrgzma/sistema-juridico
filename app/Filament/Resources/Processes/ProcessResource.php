@@ -83,33 +83,52 @@ class ProcessResource extends Resource
                             ->components([
                                 Livewire::make('⚡process-timeline')
                             ]),
-
                         Tabs\Tab::make('Documentos Anexados')
                             ->icon('heroicon-m-document-duplicate')
                             ->components([
-                                // Verifique se o relacionamento no model Process se chama 'media'
-                                RepeatableEntry::make('media')
-                                    ->label('') 
+                                RepeatableEntry::make('all_documents') // Nome fictício para o estado customizado
+                                    ->label('')
+                                    ->state(function ($record) {
+                                        // Buscamos as mídias do processo
+                                        $processMedia = $record->getMedia(); 
+                                        
+                                        // Buscamos as mídias de todas as tasks desse processo
+                                        // Usamos o model Media do Spatie para buscar onde o model_type é Task e os IDs batem
+                                        $tasksIds = $record->tasks()->pluck('id')->toArray();
+                                        $tasksMedia = \Spatie\MediaLibrary\MediaCollections\Models\Media::where('model_type', \App\Models\Task::class)
+                                            ->whereIn('model_id', $tasksIds)
+                                            ->get();
+
+                                        // Unimos as duas coleções
+                                        return $processMedia->concat($tasksMedia);
+                                    })
                                     ->schema([
                                         TextEntry::make('file_name')
                                             ->label('Nome do Arquivo')
                                             ->icon('heroicon-m-paper-clip')
                                             ->weight('medium'),
-                                            
+
+                                        TextEntry::make('model_type')
+                                            ->label('Origem')
+                                            ->formatStateUsing(fn ($state) => str_contains($state, 'Task') ? 'Tarefa' : 'Processo')
+                                            ->badge()
+                                            ->color(fn ($state) => str_contains($state, 'Task') ? 'warning' : 'success'),
+
                                         TextEntry::make('created_at')
                                             ->label('Data de Upload')
                                             ->dateTime('d/m/Y H:i'),
-                                            
+
                                         TextEntry::make('download')
                                             ->label('Ação')
                                             ->default('Baixar')
                                             ->color('primary')
                                             ->icon('heroicon-m-arrow-down-tray')
-                                            // Ajuste o path conforme o seu sistema de arquivos
-                                            ->url(fn ($record) => asset('storage/' . $record->id . '/' . $record->file_name), shouldOpenInNewTab: true), 
+                                            // IMPORTANTE: Como os arquivos são PRIVADOS, usamos o link temporário do Spatie
+                                            ->url(fn ($record) => $record->getTemporaryUrl(now()->addMinutes(10)), shouldOpenInNewTab: true),
                                     ])
-                                    ->columns(3)
+                                    ->columns(4)
                                     ->contained(true)
+
                             ]),
                     ])
                     ->columnSpanFull()

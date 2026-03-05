@@ -28,8 +28,6 @@ new class extends Component
 
         return [
             'activities' => $activities,
-            // Criamos "Dicionários" mapeando o ID para o Nome 
-            // Ex: [ 1 => 'A fazer', 2 => 'Em andamento' ]
             'columnsMap' => Column::pluck('name', 'id')->toArray(),
             'usersMap'   => User::pluck('name', 'id')->toArray(),
         ];
@@ -57,97 +55,78 @@ new class extends Component
                     </div>
                     
                     <div class="text-sm text-gray-600 dark:text-gray-300">
-                        <strong>{{ $activity->description }}</strong> 
-                        
-                        @if($activity->event === 'updated' && isset($activity->properties['attributes']))
+                        <strong class="block mb-1">{{ $activity->description }}</strong> 
+
+                        {{-- 1. UPLOAD DE DOCUMENTOS --}}
+                        @if(isset($activity->properties['custom_type']) && $activity->properties['custom_type'] === 'document_upload')
+                            <div class="mt-2 flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-900/20 dark:border-blue-800">
+                                <div class="p-2 bg-blue-500 rounded-lg">
+                                    <x-filament::icon icon="heroicon-m-document-text" class="w-5 h-5 text-white" />
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-bold text-blue-900 dark:text-blue-300">
+                                        {{ $activity->properties['file_name'] ?? 'Arquivo anexado' }}
+                                    </span>
+                                    <span class="text-xs text-blue-700 dark:text-blue-400 font-medium">Novo arquivo disponível na aba de Documentos</span>
+                                </div>
+                            </div>
+
+                        {{-- 2. COMENTÁRIOS --}}
+                        @elseif($activity->subject_type === 'App\Models\Comment' || (isset($activity->properties['attributes']['content']) && $activity->subject_type === 'App\Models\Comment'))
+                            @php
+                                $comentarioRaw = $activity->properties['attributes']['content'] ?? ($activity->properties['old']['content'] ?? '');
+                                $comentarioLimpo = strip_tags((string) $comentarioRaw);
+                            @endphp
+                            @if(!empty(trim($comentarioLimpo)))
+                                <div class="mt-2 p-3 bg-primary-50 border-l-4 border-primary-500 rounded shadow-sm dark:bg-gray-900 dark:border-primary-400">
+                                    <p class="text-gray-800 dark:text-gray-200 font-medium italic">"{{ $comentarioLimpo }}"</p>
+                                </div>
+                            @endif
+
+                        {{-- 3. ATUALIZAÇÕES GERAIS (Updated) --}}
+                        @elseif($activity->event === 'updated' && isset($activity->properties['attributes']))
                             <div class="mt-2 text-xs bg-gray-50 dark:bg-gray-900 p-2 rounded space-y-1">
                                 @foreach($activity->properties['attributes'] as $key => $value)
-                                    
-                                    {{-- IGNORA CAMPOS TÉCNICOS --}}
-                                    @if(in_array($key, ['updated_at', 'created_at', 'process_id', 'id'])) 
+                                    @if(in_array($key, ['updated_at', 'created_at', 'process_id', 'id', 'task_id', 'checklist_id', 'checklistable_id', 'checklistable_type'])) 
                                         @continue 
                                     @endif
 
                                     @if(isset($activity->properties['old'][$key]) && $activity->properties['old'][$key] != $value)
                                         @php
-                                            // Configuração Padrão
                                             $label = ucfirst($key);
                                             $oldVal = $activity->properties['old'][$key];
                                             $newVal = $value;
 
-                                            // TRADUÇÕES AMIGÁVEIS
                                             if ($key === 'column_id') {
                                                 $label = 'Fase/Etapa';
                                                 $oldVal = $columnsMap[$oldVal] ?? $oldVal;
                                                 $newVal = $columnsMap[$newVal] ?? $newVal;
-                                            } elseif ($key === 'assigned_to') {
-                                                $label = 'Responsável';
-                                                $oldVal = $usersMap[$oldVal] ?? 'Ninguém';
-                                                $newVal = $usersMap[$newVal] ?? 'Ninguém';
-                                            } elseif ($key === 'title') {
-                                                $label = 'Título';
                                             } elseif ($key === 'description') {
                                                 $label = 'Descrição';
-                                                $oldVal = strip_tags((string) $oldVal);
-                                                $newVal = strip_tags((string) $newVal);
-                                                if (trim($oldVal) === '') $oldVal = 'Vazio';
-                                                if (trim($newVal) === '') $newVal = 'Vazio';
-                                            } elseif ($key === 'status') {
-                                                $label = 'Situação';
-                                                
-                                            // --- NOVAS TRADUÇÕES PARA O CHECKLIST ---
+                                                $oldVal = strip_tags((string) $oldVal) ?: 'Vazio';
+                                                $newVal = strip_tags((string) $newVal) ?: 'Vazio';
                                             } elseif ($key === 'is_completed') {
-                                                // Se a atividade for em um ChecklistItem, tentamos pegar o nome dele e da lista pai
                                                 $itemName = $activity->subject ? $activity->subject->label : 'Item';
                                                 $listName = ($activity->subject && $activity->subject->checklist) ? $activity->subject->checklist->name : 'Lista';
-                                                
                                                 $label = "Checklist ({$listName}) - {$itemName}";
                                                 $oldVal = $oldVal ? 'Concluído' : 'Pendente';
                                                 $newVal = $newVal ? 'Concluído' : 'Pendente';
-                                                
-                                            } elseif ($key === 'label' && $activity->subject_type === 'App\Models\ChecklistItem') {
-                                                $listName = ($activity->subject && $activity->subject->checklist) ? $activity->subject->checklist->name : 'Lista';
-                                                $label = "Checklist ({$listName}) - Nome do Item";
-                                            } elseif ($key === 'name' && $activity->subject_type === 'App\Models\Checklist') {
-                                                $label = 'Nome da Lista de Tarefas';
-                                            } elseif ($key === 'content') {
-                                                $label = 'Comentário';
-                                                
-                                                // Remove possíveis tags HTML
-                                                 $oldVal = strip_tags((string) $oldVal);
-                                                $newVal = strip_tags((string) $newVal);
-                                                
-                                                if (trim($oldVal) === '') $oldVal = 'Vazio';
-                                                if (trim($newVal) === '') $newVal = 'Vazio';
                                             }
                                         @endphp
-
                                         <div class="flex gap-2">
                                             <span class="text-gray-500 font-medium">{{ $label }}:</span>
-                                            <span class="line-through text-red-500 opacity-80">
-                                                {{ is_array($oldVal) ? json_encode($oldVal) : $oldVal }}
-                                            </span>
-                                            <span class="text-green-500 font-medium">
-                                                &rarr; {{ is_array($newVal) ? json_encode($newVal) : $newVal }}
-                                            </span>
+                                            <span class="line-through text-red-500 opacity-80">{{ $oldVal }}</span>
+                                            <span class="text-green-500 font-medium">&rarr; {{ $newVal }}</span>
                                         </div>
                                     @endif
                                 @endforeach
                             </div>
                         @endif
-
-                        @if(isset($activity->properties['comment']))
-                            <p class="mt-2 italic border-l-2 border-gray-300 pl-2 text-gray-500">
-                                "{{ $activity->properties['comment'] }}"
-                            </p>
-                        @endif
                     </div>
                 </div>
             </div>
         @empty
-            <div class="text-sm text-gray-500 italic ml-6">
-                Nenhuma movimentação registrada neste processo ainda.
-            </div>
+            <div class="text-sm text-gray-500 italic ml-6">Nenhuma movimentação registrada ainda.</div>
         @endforelse
     </div>
 </div>
