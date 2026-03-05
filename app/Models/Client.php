@@ -17,6 +17,7 @@ class Client extends Model
         'type',
         'document',
         'unit_id',
+        
     ];
 
     protected function casts(): array

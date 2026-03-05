@@ -17,6 +17,7 @@ class BoardForm
                 TextInput::make('name')
                     ->required(),
                 Select::make('unit_id')
+                ->searchable()
                     ->relationship('unit', 'name')
                     ->required(),
                     Repeater::make('columns')

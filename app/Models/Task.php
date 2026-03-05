@@ -9,10 +9,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Contracts\Activity;
 
 class Task extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, LogsActivity;
 
     protected $fillable = [
         'title',
@@ -71,4 +74,20 @@ class Task extends Model implements HasMedia
         return $this->hasMany(Comment::class);
     }
     public function assignee() { return $this->belongsTo(User::class, 'assigned_to'); }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Tarefa {$eventName}")
+            ->tap(function (Activity $activity) {
+                // Injeta o ID do processo pai no JSON do log
+                // Ajuste '$this->process_id' conforme o seu relacionamento real
+                $activity->properties = $activity->properties->merge([
+                    'process_id' => $this->process_id, 
+                ]);
+            });
+    }
 }

@@ -12,7 +12,7 @@ use Spatie\Activitylog\LogOptions;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -54,7 +54,6 @@ class User extends Authenticatable
         return $this->belongsTo(Unit::class);
     }
 
-        use LogsActivity;
 
     public function getActivitylogOptions(): LogOptions
     {

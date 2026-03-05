@@ -23,7 +23,16 @@ class BoardsTable
             ])
             ->columns([
                 Tables\Columns\Layout\Stack::make([
+                    Tables\Columns\TextColumn::make('client.name')
+                        ->disabled()
+                        ->weight('bold')
+                        ->size('lg'),
+                    Tables\Columns\TextColumn::make('process.number')
+                        ->disabled()
+                        ->weight('bold')
+                        ->size('lg'),
                     Tables\Columns\TextColumn::make('name')
+                        ->label('Quadro')
                         ->weight('bold')
                         ->size('lg'),
                     Tables\Columns\TextColumn::make('unit.name')

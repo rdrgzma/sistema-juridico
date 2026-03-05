@@ -4,6 +4,8 @@ namespace App\Filament\Pages;
 
 use App\Models\Board;
 use App\Models\Task;
+use App\Models\Client;
+use App\Models\Process;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -24,6 +26,8 @@ use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Notifications\Notification;
 use Livewire\Attributes\On;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 
 class BoardKanban extends Page implements HasSchemas, HasActions
 {
@@ -75,7 +79,7 @@ class BoardKanban extends Page implements HasSchemas, HasActions
         Notification::make()->title('Tarefa movida!')->success()->send();
     }
 
-    /**
+/**
      * Action para CRIAR tarefa
      */
     public function createTaskAction(): Action
@@ -83,6 +87,31 @@ class BoardKanban extends Page implements HasSchemas, HasActions
         return Action::make('createTask')
             ->form([
                 TextInput::make('title')->label('Título')->required(),
+                Select::make('client_id')
+                    ->label('Cliente')
+                    ->options(\App\Models\Client::pluck('name', 'id'))
+                    ->searchable()
+                    ->preload()
+                    ->live() // <-- ATIVA A REATIVIDADE NO FORMULÁRIO
+                    ->afterStateUpdated(fn (Set $set) => $set('process_id', null)), // <-- LIMPA O PROCESSO SE TROCAR O CLIENTE
+                    
+                Select::make('process_id')
+                    ->label('Processo')
+                    ->options(function (Get $get) {
+                        $clientId = $get('client_id'); // Pega o ID do cliente selecionado
+                        
+                        // Se não tem cliente selecionado, não mostra nenhum processo
+                        if (! $clientId) {
+                            return []; 
+                        }
+                        
+                        // Se tem cliente, busca apenas os processos daquele cliente
+                        // NOTA: Troque o primeiro 'id' pela coluna que quer exibir (ex: 'numero')
+                        return \App\Models\Process::where('client_id', $clientId)->pluck('number', 'id');
+                    })
+                    ->searchable()
+                    ->preload(),
+
                 Hidden::make('column_id'),
             ])
             ->mountUsing(fn ($schema, array $arguments) => $schema->fill([
@@ -97,15 +126,11 @@ class BoardKanban extends Page implements HasSchemas, HasActions
     /**
      * Action para EDITAR tarefa completa
      */
-public function editTaskAction(): Action
+    public function editTaskAction(): Action
     {
         return Action::make('editTask')
-            // Busca o registro no banco de dados baseado no ID passado pelo Blade
             ->record(fn (array $arguments) => Task::find($arguments['record'] ?? null))
-            
-            // CORREÇÃO: Esta linha carrega os dados existentes da Task para dentro dos inputs
             ->fillForm(fn (Task $record): array => $record->attributesToArray())
-            
             ->modalHeading(fn (Task $record) => "Editar Tarefa: {$record->title}")
             ->form([
                 Tabs::make('Detalhes')
@@ -114,8 +139,30 @@ public function editTaskAction(): Action
                             ->schema([
                                 TextInput::make('title')
                                     ->label('Título')
-                                    ->required(),
-                                
+                                    ->required(),                                
+                                Select::make('client_id')
+                                    ->label('Cliente')
+                                    ->options(\App\Models\Client::pluck('name', 'id'))
+                                    ->searchable()
+                                    ->preload()
+                                    ->disabled(), // <--- ADICIONADO AQUI: Desabilita a edição
+                                Select::make('process_id')
+                                    ->label('Processo')
+                                    ->options(function (Get $get) {
+                                        $clientId = $get('client_id');                                        
+                                        if (! $clientId) {
+                                            return [];
+                                        }                                        
+                                        return \App\Models\Process::where('client_id', $clientId)->pluck('number', 'id');
+                                    })
+                                    ->searchable()
+                                    ->preload()
+                                    ->disabled(),
+                                    Select::make('assigned_to')
+                                    ->label('Atribuir a (Responsável)')
+                                    ->options(\App\Models\User::pluck('name', 'id'))
+                                    ->searchable()
+                                    ->preload(),
                                 RichEditor::make('description')
                                     ->label('Descrição'),
                                 
@@ -129,7 +176,6 @@ public function editTaskAction(): Action
 
                         Tab::make('Checklist')
                             ->schema([
-                                // O Repeater com relationship() já gerencia o preenchimento dos checklists vinculados
                                 Repeater::make('checklists')
                                     ->relationship()
                                     ->schema([
@@ -162,20 +208,18 @@ public function editTaskAction(): Action
                     ])
             ])
             ->extraModalFooterActions([
+                // ... action de deletar mantida
                 Action::make('deleteTask')
                     ->label('Excluir Tarefa')
                     ->color('danger')
                     ->icon('heroicon-m-trash')
-                    ->requiresConfirmation() // Ativa o diálogo de confirmação
+                    ->requiresConfirmation()
                     ->modalHeading('Excluir Tarefa')
-                    ->modalDescription('Tem certeza que deseja apagar esta tarefa? Esta ação removerá permanentemente todos os checklists e comentários vinculados.')
+                    ->modalDescription('Tem certeza que deseja apagar esta tarefa?')
                     ->modalSubmitActionLabel('Sim, excluir permanentemente')
                     ->action(function (Task $record) {
-                        // O Laravel cuidará da remoção se houver cascades, caso contrário, apaga o registro
                         $record->delete();
-                        
                         $this->loadBoard($this->board->id);
-                        
                         Notification::make()
                             ->title('Tarefa removida com sucesso')
                             ->success()

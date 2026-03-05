@@ -38,7 +38,9 @@
                                  x-on:dragstart="event.dataTransfer.setData('task_id', {{ $task->id }})"
                                  wire:click="mountAction('editTask', { record: {{ $task->id }} })">
                                 
-                                <p style="font-size: 0.85rem; font-weight: 600; color: #1f2937;">{{ $task->title }}</p>
+                                <p style="font-size: 0.85rem; font-weight: 600; color: #1f2937; text-transform: uppercase;">{{ $task->title }}</p>
+                                <p style="font-size: 0.65rem; font-weight: 800; color: #3b82f6; text-transform: uppercase;">{{ $task->process->number ?? 'Sem Processo' }}</p>
+                                <p style="font-size: 0.65rem; font-weight: 800; color: #3b82f6; text-transform: uppercase;">{{ $task->client->name ?? 'Sem Cliente' }}</p>
                                 <span style="font-size: 0.65rem; font-weight: 800; color: #3b82f6; text-transform: uppercase;">{{ $task->priority }}</span>
                             </div>
                         @endforeach
