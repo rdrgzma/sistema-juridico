@@ -20,6 +20,7 @@ class BoardResource extends Resource
     protected static ?string $model = Board::class;
     protected static string|UnitEnum|null $navigationGroup = 'Jurídico';
 
+    protected static ?string $label = 'Quadros';
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedViewColumns;
 
     protected static ?string $recordTitleAttribute = 'name';

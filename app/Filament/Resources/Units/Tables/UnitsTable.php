@@ -16,22 +16,30 @@ class UnitsTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Nome')
                     ->searchable(),
                 TextColumn::make('city')
+                    ->label('Cidade')
                     ->searchable(),
                 TextColumn::make('state')
+                    ->label('Estado')
                     ->searchable(),
                 TextColumn::make('responsible_name')
+                    ->label('Responsável')
                     ->searchable(),
                 TextColumn::make('status')
+                    ->label('Status')
                     ->searchable(),
                 IconColumn::make('is_matriz')
+                    ->label('Matriz')
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label('Criado em')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Atualizado em')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

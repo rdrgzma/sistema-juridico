@@ -15,19 +15,25 @@ class ClientsTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Nome')
                     ->searchable(),
                 TextColumn::make('type')
+                    ->label('Tipo')
                     ->badge()
                     ->searchable(),
                 TextColumn::make('document')
+                    ->label('Documento')
                     ->searchable(),
                 TextColumn::make('unit.name')
-                    ->searchable(),
+                    ->label('Unidade')
+                    ->  searchable(),
                 TextColumn::make('created_at')
+                    ->label('Criado em')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Atualizado em')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

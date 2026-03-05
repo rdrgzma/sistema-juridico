@@ -29,6 +29,7 @@ class ProcessResource extends Resource
     protected static ?string $model = Process::class;
     protected static string|UnitEnum|null $navigationGroup = 'Jurídico';
 
+    protected static ?string $label = 'Processos';
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Briefcase;
 
     public static function form(Schema $schema): Schema

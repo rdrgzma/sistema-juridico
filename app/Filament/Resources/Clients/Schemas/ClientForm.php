@@ -16,33 +16,51 @@ class ClientForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nome') 
                     ->required(),
                 Select::make('type')
+                    ->label('Tipo')
                     ->options(ClientType::class)
                     ->required(),
-                TextInput::make('document'),
+                TextInput::make('document')
+                    ->label('Documento'),
                 Select::make('unit_id')
                     ->relationship('unit', 'name')
                     ->required(),
                 Repeater::make('contacts')
+                    ->label('Contatos')
                     ->relationship()
                     ->schema([
-                        TextInput::make('type')->required(),
-                        TextInput::make('value')->required(),
-                        Toggle::make('is_primary'),
+                        TextInput::make('type')
+                            ->label('Tipo')
+                            ->required(),
+                        TextInput::make('value')
+                            ->label('Valor')
+                            ->required(),
+                        Toggle::make('is_primary')
+                            ->label('Principal'),
                     ])
                     ->columns(['md' => 3]),
                 Repeater::make('addresses')
+                    ->label('Endereços')
                     ->relationship()
                     ->schema([
-                        TextInput::make('zip_code'),
-                        TextInput::make('street'),
-                        TextInput::make('number'),
-                        TextInput::make('complement'),
-                        TextInput::make('neighborhood'),
-                        TextInput::make('city'),
-                        TextInput::make('state'),
-                        Toggle::make('is_primary'),
+                        TextInput::make('zip_code')
+                            ->label('CEP'),
+                        TextInput::make('street')
+                            ->label('Rua'),
+                        TextInput::make('number')
+                            ->label('Número'),
+                        TextInput::make('complement')
+                            ->label('Complemento'),
+                        TextInput::make('neighborhood')
+                            ->label('Bairro'),
+                        TextInput::make('city')
+                            ->label('Cidade'),
+                        TextInput::make('state')
+                            ->label('Estado'),
+                        Toggle::make('is_primary')
+                            ->label('Principal'),
                     ])
                     ->columns(['md' => 2]),
             ]);

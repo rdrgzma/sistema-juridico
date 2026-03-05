@@ -65,7 +65,7 @@ return [
     | The format used for displaying dates in the timeline and table.
     |
     */
-    'datetime_format' => 'M d, Y H:i:s',
+    'datetime_format' => 'd/m/Y H:i:s',
 
     /*
     |--------------------------------------------------------------------------

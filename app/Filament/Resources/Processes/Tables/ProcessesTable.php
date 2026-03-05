@@ -16,30 +16,40 @@ class ProcessesTable
         return $table
             ->columns([
                 TextColumn::make('number')
+                    ->label('Número')
                     ->searchable(),
                 TextColumn::make('court')
+                    ->label('Tribunal')
                     ->searchable(),
                 TextColumn::make('value')
+                    ->label('Valor')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('probability')
+                    ->label('Probabilidade')
                     ->badge()
                     ->searchable(),
                 TextColumn::make('risk_level')
+                    ->label('Risco')
                     ->badge()
                     ->searchable(),
                 TextColumn::make('status')
+                    ->label('Status')
                     ->badge()
                     ->searchable(),
                 TextColumn::make('client.name')
+                    ->label('Cliente')
                     ->searchable(),
                 TextColumn::make('unit.name')
+                    ->label('Unidade')
                     ->searchable(),
                 TextColumn::make('created_at')
+                    ->label('Criado em')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Atualizado em')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -20,6 +20,7 @@ class ClientResource extends Resource
     protected static ?string $model = Client::class;
     protected static string|UnitEnum|null $navigationGroup = 'Jurídico';
 
+    protected static ?string $label = 'Clientes';
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
     public static function form(Schema $schema): Schema

@@ -20,6 +20,7 @@ class UnitResource extends Resource
     protected static ?string $model = Unit::class;
     protected static string | UnitEnum | null $navigationGroup = 'Administração';
 
+    protected static ?string $label = 'Unidades';
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
     protected static ?string $recordTitleAttribute = 'name';
