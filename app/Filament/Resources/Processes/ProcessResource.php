@@ -22,12 +22,14 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
+use UnitEnum;
 
 class ProcessResource extends Resource
 {
     protected static ?string $model = Process::class;
+    protected static string|UnitEnum|null $navigationGroup = 'Jurídico';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Briefcase;
 
     public static function form(Schema $schema): Schema
     {

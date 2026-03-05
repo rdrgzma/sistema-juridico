@@ -25,6 +25,7 @@ use AlizHarb\ActivityLog\ActivityLogPlugin;
 use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
 use Filament\Navigation\MenuItem;
 use Joaopaulolndev\FilamentEditProfile\Pages\EditProfilePage;
+use Filament\Support\Icons\Heroicon;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -72,9 +73,12 @@ class AdminPanelProvider extends PanelProvider
                     ->blur(3)),
             ActivityLogPlugin::make()
                 ->label('Log')
-                ->pluralLabel('Logs'),
+                ->pluralLabel('Logs')
+                ->navigationGroup('Sistema'),
             FilamentEditProfilePlugin::make()
+            ->setTitle('Meu Perfil')
                 ->setIcon('heroicon-o-user')
+                ->setNavigationGroup('Perfil'),
 
         ]);
     }
