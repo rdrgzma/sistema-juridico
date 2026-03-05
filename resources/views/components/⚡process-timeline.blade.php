@@ -88,17 +88,28 @@ new class extends Component
                                                 $label = 'Título';
                                             } elseif ($key === 'description') {
                                                 $label = 'Descrição';
-                                                
-                                                // Remove as tags HTML (ex: <p>, <strong>, <br>)
                                                 $oldVal = strip_tags((string) $oldVal);
                                                 $newVal = strip_tags((string) $newVal);
-                                                
-                                                // Se ficar apenas espaço em branco após remover as tags, mostra "Vazio"
                                                 if (trim($oldVal) === '') $oldVal = 'Vazio';
                                                 if (trim($newVal) === '') $newVal = 'Vazio';
-                                                
                                             } elseif ($key === 'status') {
                                                 $label = 'Situação';
+                                                
+                                            // --- NOVAS TRADUÇÕES PARA O CHECKLIST ---
+                                            } elseif ($key === 'is_completed') {
+                                                // Se a atividade for em um ChecklistItem, tentamos pegar o nome dele e da lista pai
+                                                $itemName = $activity->subject ? $activity->subject->label : 'Item';
+                                                $listName = ($activity->subject && $activity->subject->checklist) ? $activity->subject->checklist->name : 'Lista';
+                                                
+                                                $label = "Checklist ({$listName}) - {$itemName}";
+                                                $oldVal = $oldVal ? 'Concluído' : 'Pendente';
+                                                $newVal = $newVal ? 'Concluído' : 'Pendente';
+                                                
+                                            } elseif ($key === 'label' && $activity->subject_type === 'App\Models\ChecklistItem') {
+                                                $listName = ($activity->subject && $activity->subject->checklist) ? $activity->subject->checklist->name : 'Lista';
+                                                $label = "Checklist ({$listName}) - Nome do Item";
+                                            } elseif ($key === 'name' && $activity->subject_type === 'App\Models\Checklist') {
+                                                $label = 'Nome da Lista de Tarefas';
                                             }
                                         @endphp
 

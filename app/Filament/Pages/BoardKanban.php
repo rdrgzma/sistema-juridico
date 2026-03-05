@@ -186,7 +186,7 @@ class BoardKanban extends Page implements HasSchemas, HasActions
                                     ->relationship()
                                     ->schema([
                                         TextInput::make('name')
-                                            ->label('Grupo')
+                                            ->label('Nome da Lista')
                                             ->required(),
                                         
                                         Repeater::make('items')
