@@ -110,6 +110,15 @@ new class extends Component
                                                 $label = "Checklist ({$listName}) - Nome do Item";
                                             } elseif ($key === 'name' && $activity->subject_type === 'App\Models\Checklist') {
                                                 $label = 'Nome da Lista de Tarefas';
+                                            } elseif ($key === 'content') {
+                                                $label = 'Comentário';
+                                                
+                                                // Remove possíveis tags HTML
+                                                 $oldVal = strip_tags((string) $oldVal);
+                                                $newVal = strip_tags((string) $newVal);
+                                                
+                                                if (trim($oldVal) === '') $oldVal = 'Vazio';
+                                                if (trim($newVal) === '') $newVal = 'Vazio';
                                             }
                                         @endphp
 
